@@ -1,7 +1,7 @@
-$admin_username = "",
-$admin_password = "",
-$windows_update = $false,
-$manual_install = $true,
+$admin_username = ""
+$admin_password = ""
+$windows_update = $false
+$manual_install = $true
 $virtual_audio = $true
 
 $filePath = "C:\vm-script-parameters.txt"
