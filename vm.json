@@ -194,7 +194,7 @@
                 {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
                     "name": "[concat(variables('fullVMName'), '/customScript')]",
-                    "apiVersion": "2023-05-01",
+                    "apiVersion": "2018-06-01",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
                         "[variables('fullVMName')]"
@@ -208,7 +208,7 @@
                             "fileUris": [
                                 "[concat(parameters('scriptLocation'), '/', variables('ScriptFileName'))]"
                             ],
-                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFileName'), ' ', variables('scriptParameters'))]"
+                            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File ', variables('scriptFileName'), ' ', variables('scriptParameters'))]"
                         }
                     }
                 }
