@@ -259,18 +259,24 @@ function Disable-Devices {
         Write-Host "Device '$deviceName' not found."
     }
 
-    $deviceName = "Generic PnP Monitor"
+#---------------------------------------------------------------------------------------------------------------------
+	#uncoment to see what is happening
 
-    # Find the device with the specified name
-    $device = Get-PnpDevice | Where-Object { $_.Name -eq $deviceName }
+    # $deviceName = "Generic PnP Monitor"
 
-    if ($device) {
-        # Run devcon to disable the device by its hardware ID
-        & $devcon disable $device.HardwareID[0]
-        Write-Host "Device '$deviceName' has been disabled."
-    } else {
-        Write-Host "Device '$deviceName' not found."
-    }
+    # # Find the device with the specified name
+    # $device = Get-PnpDevice | Where-Object { $_.Name -eq $deviceName }
+
+    # if ($device) {
+    #     # Run devcon to disable the device by its hardware ID
+    #     & $devcon disable $device.HardwareID[0]
+    #     Write-Host "Device '$deviceName' has been disabled."
+    # } else {
+    #     Write-Host "Device '$deviceName' not found."
+    # }
+
+    #uncomment to see what is happening
+#-------------------------------------------------------------------------------------------------------------------
 
     # Write-Output "Delete the basic display adapter's drivers (since Parsec still see 2 Display adapter)"
     # takeown /f C:\Windows\System32\drivers\BasicDisplay.sys
