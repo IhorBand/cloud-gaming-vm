@@ -204,6 +204,8 @@ function Disable-Devices {
 
     # Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
 
+    Install-PackageProvider -Name NuGet -Force -Confirm:$False
+    Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
     Install-Module -Name PSDisableDevice -Force -Confirm:$False 
     Import-Module PSDisableDevice
     
