@@ -204,7 +204,7 @@ function Disable-Devices {
 
     # Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
 
-    Install-Module -Name PSDisableDevice -Force -Scope CurrentUser
+    Install-Module -Name PSDisableDevice -Force -Confirm:$False 
     Import-Module PSDisableDevice
     
     Write-Output "Disabling Hyper-V Video"
