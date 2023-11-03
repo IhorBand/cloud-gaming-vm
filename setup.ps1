@@ -1,3 +1,12 @@
+param (
+    [string]$admin_username = "",
+    [string]$admin_password = "",
+    [string]$parsec_admin_id = "",
+    [switch]$windows_update = $false,
+    [switch]$manual_install = $true,
+    [switch]$virtual_audio = $true
+)
+
 # Checking if 7zip or WinRAR are installed
 # Check 7zip install path on registry
 $7zipinstalled = $false 
@@ -178,3 +187,47 @@ Start-Process -FilePath "$extractFolder\setup.exe" -ArgumentList $install_args -
 # ping api about success
 
 Write-Host "NVidia Grid Installed."
+
+
+#setup computer
+function Get-UtilsScript ($script_name) {
+    $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$script_name"
+    Write-Host "Downloading utils script from $url"
+    [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+    $webClient = new-object System.Net.WebClient
+    $webClient.DownloadFile($url, "C:\$script_name")
+}
+
+$script_name = "utils.psm1"
+Get-UtilsScript $script_name
+Import-Module "C:\$script_name"
+
+if ($windows_update) {
+    Update-Windows
+}
+Update-Firewall
+Disable-Defender
+Disable-ScheduledTasks
+Disable-IPv6To4
+if ($manual_install) {
+    Disable-InternetExplorerESC
+}
+Edit-VisualEffectsRegistry
+Add-DisconnectShortcut
+
+#Install-Chocolatey
+
+# legacy approach as Parsec still see 2 Displays
+# Disable-Devices
+Manage-Display-Adapters
+Disable-TCC
+Enable-Audio
+if($virtual_audio){
+    Install-VirtualAudio
+}
+Install-Parsec
+Install-Steam
+Install-EpicGameLauncher
+Add-AutoLogin $admin_username $admin_password
+Restart-Computer

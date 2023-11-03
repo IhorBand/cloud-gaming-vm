@@ -18,6 +18,17 @@
             "defaultValue": "admin",
             "type": "string"
         },
+        "parsecAdminId": {
+            "type": "string",
+            "defaultValue": "12345"
+        },
+        "scriptLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of the setup script."
+            },
+            "defaultValue": "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main"
+        },
         "customData": {
             "type": "string",
             "defaultValue": "",
@@ -32,7 +43,10 @@
         "virtualNetworkName": "[concat(variables('fullVMName'), '-vnet')]",
         "networkInterfaceName": "[concat(variables('fullVMName'), '-ni_z1')]",
         "networkSecurityGroupName": "[concat(variables('fullVMName'), '-nsg')]",
-        "osDiskName": "[concat(variables('fullVMName'), '-disk_OsDisk_1')]"
+        "osDiskName": "[concat(variables('fullVMName'), '-disk_OsDisk_1')]",
+        "scriptFileName": "setup.ps1",
+        "scriptFolder": ".",
+        "scriptParameters": "[concat('-parsec_admin_id \"', parameters('parsecAdminId'), '\" -admin_username \"', parameters('osAdminUserName'), '\" -admin_password \"', parameters('osAdminPassword'), '\"')]"
     },
     "resources": [
         {
@@ -180,7 +194,30 @@
                 "billingProfile": {
                     "maxPrice": -1
                 }
-            }
+            },
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "SetupWithoutWindowsUpdate",
+                    "apiVersion": "2023-05-01",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[variables('fullVMName')]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Compute",
+                        "type": "CustomScriptExtension",
+                        "typeHandlerVersion": "1.8",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "[concat(parameters('scriptLocation'), '/', variables('ScriptFolder'), '/', variables('ScriptFileName'))]"
+                            ],
+                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('scriptFolder'), '/', variables('scriptFileName'), ' ', variables('scriptParameters'))]"
+                        }
+                    }
+                }
+            ]
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
