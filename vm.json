@@ -17,6 +17,13 @@
         "osAdminPassword": {
             "defaultValue": "admin",
             "type": "string"
+        },
+        "customData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "String passed down to the Virtual Machine."
+            }
         }
     },
     "variables": {
@@ -122,9 +129,6 @@
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
             },
-            "zones": [
-                "1"
-            ],
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "Standard_NC8as_T4_v3"
@@ -141,7 +145,10 @@
                         "name": "[variables('osDiskName')]",
                         "createOption": "FromImage",
                         "caching": "ReadWrite",
-                        "deleteOption": "Delete"
+                        "deleteOption": "Delete",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
                     },
                     "dataDisks": [],
                     "diskControllerType": "SCSI"
@@ -150,19 +157,7 @@
                     "computerName": "[concat(parameters('osAdminUserName'), '-gaming')]",
                     "adminUsername": "[parameters('osAdminUserName')]",
                     "adminPassword": "[parameters('osAdminPassword')]",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true,
-                        "patchSettings": {
-                            "patchMode": "AutomaticByOS",
-                            "assessmentMode": "ImageDefault",
-                            "enableHotpatching": false
-                        },
-                        "enableVMAgentPlatformUpdates": false
-                    },
-                    "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "customData": "[parameters('customData')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
