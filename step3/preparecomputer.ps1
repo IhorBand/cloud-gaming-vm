@@ -41,13 +41,13 @@ Add-DisconnectShortcut
 
 #Install-Chocolatey
 
-Disable-Devices
 #Manage-Display-Adapters
 Disable-TCC
 Enable-Audio
 if($virtual_audio){
     Install-VirtualAudio
 }
+Disable-Devices
 Install-Parsec
 Install-Steam
 Install-EpicGameLauncher
