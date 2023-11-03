@@ -189,59 +189,42 @@ function Add-AutoLogin ($admin_username, $admin_password) {
     Set-ItemProperty $registry "NoLockScreen" -Value 1 -type DWord
 }
 
-
-# Manage Display Adapters
-function Manage-Display-Adapters {
-  Write-Host -ForegroundColor Cyan "Starting Manage-Display-Adapters function..."
-
-  $url = "https://gallery.technet.microsoft.com/PowerShell-Device-60d73bb0/file/147248/2/DeviceManagement.zip"
-  $compressed_file = "DeviceManagement.zip"
-  $extract_folder = "DeviceManagement"
-
-  Write-Output "Downloading Device Management Powershell Script"
-  (New-Object System.Net.WebClient).DownloadFile($url, "$PSScriptRoot\$compressed_file")
-  Unblock-File -Path "$PSScriptRoot\$compressed_file"
-
-  Write-Output "Extracting Device Management Powershell Script"
-  Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\$extract_folder" -Force
-  Remove-Item -Path "$PSScriptRoot\$compressed_file" -Confirm:$false
-
-  Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
-  Write-Output "Disabling Microsoft Hyper-V Video"
-  Get-Device | Where-Object -Property Name -Like "Microsoft Hyper-V Video" | Disable-Device -Confirm:$false
-  Write-Output "Disabling Generic PnP Monitor"
-  Get-Device | Where-Object -Property Name -Like "Generic PnP Monitor" | Where DeviceParent -like "*BasicDisplay*" | Disable-Device  -Confirm:$false
-
-  Write-Output "Delete the basic display adapter's drivers (since Parsec still see 2 Display adapter)"
-  takeown /f C:\Windows\System32\Drivers\BasicDisplay.sys
-  icacls C:\Windows\System32\Drivers\BasicDisplay.sys /grant "$env:username`:F"
-  move C:\Windows\System32\Drivers\BasicDisplay.sys C:\Windows\System32\Drivers\BasicDisplay.old
-
-  Write-Output "Enabling NvFBC..."
-  (New-Object System.Net.WebClient).DownloadFile("https://github.com/nVentiveUX/azure-gaming/raw/master/NvFBCEnable.zip", "$PSScriptRoot\NvFBCEnable.zip")
-  Expand-Archive -LiteralPath "$PSScriptRoot\NvFBCEnable.zip" -DestinationPath "$PSScriptRoot"
-  & "$PSScriptRoot\NvFBCEnable.exe" -enable -noreset
-
-  Write-Host -ForegroundColor Green "Done."
-}
-
 # legacy approach as Parsec still see 2 Displays
-# function Disable-Devices {
-#     $url = "https://gallery.technet.microsoft.com/PowerShell-Device-60d73bb0/file/147248/2/DeviceManagement.zip"
-#     $compressed_file = "DeviceManagement.zip"
-#     $extract_folder = "DeviceManagement"
+function Disable-Devices {
+    # $url = "https://gallery.technet.microsoft.com/PowerShell-Device-60d73bb0/file/147248/2/DeviceManagement.zip"
+    # $compressed_file = "DeviceManagement.zip"
+    # $extract_folder = "DeviceManagement"
 
-#     Write-Output "Downloading Device Management Powershell Script from $url"
-#     $webClient.DownloadFile($url, "$PSScriptRoot\$compressed_file")
-#     Unblock-File -Path "$PSScriptRoot\$compressed_file"
+    # Write-Output "Downloading Device Management Powershell Script from $url"
+    # $webClient.DownloadFile($url, "$PSScriptRoot\$compressed_file")
+    # Unblock-File -Path "$PSScriptRoot\$compressed_file"
 
-#     Write-Output "Extracting Device Management Powershell Script"
-#     Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\$extract_folder" -Force
+    # Write-Output "Extracting Device Management Powershell Script"
+    # Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\$extract_folder" -Force
 
-#     Write-Output "Disabling Hyper-V Video"
-#     Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
-#     Get-Device | Where-Object -Property Name -Like "Microsoft Hyper-V Video" | Disable-Device -Confirm:$false
-# }
+    # Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
+
+    Install-Module -Name PSDisableDevice -Force -Scope CurrentUser
+    Import-Module PSDisableDevice
+    
+    Write-Output "Disabling Hyper-V Video"
+    Get-Device | Where-Object -Property Name -Like "Microsoft Hyper-V Video" | Disable-Device -Confirm:$false
+
+    Write-Output "Disabling Generic PnP Monitor"
+    Get-Device | Where-Object -Property Name -Like "Generic PnP Monitor" | Where DeviceParent -like "*BasicDisplay*" | Disable-Device  -Confirm:$false
+
+    Write-Output "Delete the basic display adapter's drivers (since Parsec still see 2 Display adapter)"
+    takeown /f C:\Windows\System32\drivers\BasicDisplay.sys
+    icacls C:\Windows\System32\drivers\BasicDisplay.sys /grant "$env:username`:F"
+    move C:\Windows\System32\drivers\BasicDisplay.sys C:\Windows\System32\Drivers\BasicDisplay.old
+
+    Write-Output "Enabling NvFBC..."
+    (New-Object System.Net.WebClient).DownloadFile("https://github.com/nVentiveUX/azure-gaming/raw/master/NvFBCEnable.zip", "$PSScriptRoot\NvFBCEnable.zip")
+    Expand-Archive -LiteralPath "$PSScriptRoot\NvFBCEnable.zip" -DestinationPath "$PSScriptRoot"
+    & "$PSScriptRoot\NvFBCEnable.exe" -enable -noreset
+
+    Write-Host -ForegroundColor Green "Done."
+}
 
 #legacy approach
 # function Install-Steam {
@@ -275,7 +258,7 @@ function Install-Parsec {
   Write-Output "Downloading Parsec into path $PSScriptRoot\$parsec_exe"
   (New-Object System.Net.WebClient).DownloadFile("https://s3.amazonaws.com/parsec-build/package/parsec-windows.exe", "$PSScriptRoot\$parsec_exe")
   Write-Output "Installing Parsec"
-  Start-Process -FilePath "$PSScriptRoot\$parsec_exe" -ArgumentList "/S /user_id=12554134" -Wait
+  Start-Process -FilePath "$PSScriptRoot\$parsec_exe" -ArgumentList "/S /shared" -Wait
   Remove-Item -Path "$PSScriptRoot\$parsec_exe" -Confirm:$false
 
   Write-Host -ForegroundColor Green "Done."
@@ -292,4 +275,12 @@ function Install-EpicGameLauncher {
   Remove-Item -Path "$PSScriptRoot\$epic_msi" -Confirm:$false
 
   Write-Host -ForegroundColor Green "Done."
+}
+
+function Download-To ($url, $to) {
+    Write-Host "Downloading from $url"
+    [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+    $webClient = new-object System.Net.WebClient
+    $webClient.DownloadFile($url, $to)
 }

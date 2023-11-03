@@ -218,9 +218,8 @@ Add-DisconnectShortcut
 
 #Install-Chocolatey
 
-# legacy approach as Parsec still see 2 Displays
-# Disable-Devices
-Manage-Display-Adapters
+Disable-Devices
+#Manage-Display-Adapters
 Disable-TCC
 Enable-Audio
 if($virtual_audio){
@@ -230,4 +229,20 @@ Install-Parsec
 Install-Steam
 Install-EpicGameLauncher
 Add-AutoLogin $admin_username $admin_password
+
+
+
+
+# Define the destination folder path (Startup folder)
+$destinationFolderPath = [System.IO.Path]::Combine([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::CommonStartMenu), "Programs\Startup")
+# Build the full destination path including the filename
+$destinationFilePath = [System.IO.Path]::Combine($destinationFolderPath, 'parsecd.vbs')
+$parsecvbdurl = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/parsecd.vbs"
+Download-To $parsecvbdurl $destinationFilePath
+
+Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/nvcli.exe" "C:\nvcli.exe"
+
+$destinationFilePath = [System.IO.Path]::Combine($destinationFolderPath, 'nvcli_resolutionfix.bat')
+Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/nvcli_resolutionfix.bat" $destinationFilePath
+
 Restart-Computer
