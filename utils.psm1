@@ -169,7 +169,7 @@ function Add-DisconnectShortcut {
     $Shortcut.TargetPath = "C:\Windows\System32\tscon.exe"
     $Shortcut.Arguments = "1 /dest:console"
     $Shortcut.Save()
-    $ShortcutSecond = $WshShell.CreateShortcut("C:\Users\Public\Desktop\disconnect.lnk")
+    $ShortcutSecond = $WshShell.CreateShortcut("C:\Users\Public\Desktop\disconnect2.lnk")
     $ShortcutSecond.TargetPath = "C:\Windows\System32\tscon.exe"
     $ShortcutSecond.Arguments = "2 /dest:console"
     $ShortcutSecond.Save()
