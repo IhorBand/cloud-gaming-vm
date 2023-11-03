@@ -122,4 +122,59 @@ Start-Process -FilePath "$extractFolder\setup.exe" -ArgumentList $install_args -
 
 # ping api about success
 
-Write-Host "Installed."
+Write-Host "Nvidia Drivers Installed."
+
+# Nvidia Grid
+Write-Host "Installing GRID Drivers"
+
+# Downloading the installer
+$nvidiaTempFolder = "C:\NVIDIA"
+New-Item -Path $nvidiaTempFolder -ItemType Directory 2>&1 | Out-Null
+
+$url = "https://go.microsoft.com/fwlink/?linkid=874181"
+
+$dlFile = "$nvidiaTempFolder\nvidiaGridDriver.exe"
+Write-Host "Downloading the latest version to $dlFile"
+Start-BitsTransfer -Source $url -Destination $dlFile
+
+if ($?) {
+    Write-Host "Proceed..."
+}
+else {
+    Write-Host "Download failed"
+    #ping api about error
+}
+
+
+# Extracting setup files
+$extractFolder = "$nvidiaTempFolder\nvidiaGridDriver"
+$filesToExtract = "Display.Driver Display.Nview MSVCRT NVI2 EULA.txt setup.cfg setup.exe"
+Write-Host "Download finished, extracting the files now..."
+
+if ($7zipinstalled) {
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $dlFile $filesToExtract -o""$extractFolder""" -wait
+}
+elseif ($archiverProgram -eq $winrarpath) {
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
+}
+else {
+    Write-Host "Something went wrong. No archive program detected. This should not happen."
+    Write-Host "Press any key to exit..."
+    # ping api about error
+    exit
+}
+
+
+# Remove unneeded dependencies from setup.cfg
+#(Get-Content "$extractFolder\setup.cfg") | Where-Object { $_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}' } | Set-Content "$extractFolder\setup.cfg" -Encoding UTF8 -Force
+
+Write-Host "Installing GRID Nvidia drivers now..."
+$install_args = "-passive -noreboot -noeula -nofinish -s"
+if ($clean) {
+    $install_args = $install_args + " -clean"
+}
+Start-Process -FilePath "$extractFolder\setup.exe" -ArgumentList $install_args -wait
+
+# ping api about success
+
+Write-Host "NVidia Grid Installed."
