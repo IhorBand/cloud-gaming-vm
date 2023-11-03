@@ -33,4 +33,6 @@ $destinationFolderPath = [System.IO.Path]::Combine([System.Environment]::GetFold
 $destinationFilePath = [System.IO.Path]::Combine($destinationFolderPath, 'start_installgpudriver.bat')
 Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/step1/start_installgpudriver.bat" $destinationFilePath
 
+Add-AutoLogin $admin_username $admin_password
+
 Restart-Computer

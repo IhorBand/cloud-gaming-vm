@@ -186,7 +186,7 @@ function Add-AutoLogin ($admin_username, $admin_password) {
     Set-ItemProperty $registry "DefaultUsername" -Value $admin_username -type String
     Set-ItemProperty $registry "DefaultPassword" -Value $admin_password -type String
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Force
-    Set-ItemProperty $registry "NoLockScreen" -Value 1 -type DWord
+    Set-ItemProperty "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreen" -Value 1 -type DWord
 }
 
 # legacy approach as Parsec still see 2 Displays
