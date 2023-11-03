@@ -204,21 +204,78 @@ function Disable-Devices {
 
     # Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
 
-    Install-PackageProvider -Name NuGet -Force -Confirm:$False
-    Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
-    Install-Module -Name PSDisableDevice -Force -Confirm:$False 
-    Import-Module PSDisableDevice
+    # Install-PackageProvider -Name NuGet -Force -Confirm:$False
+    # Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
+    # Install-Package -Name PSDisableDevice -Force -Confirm:$False 
+    # Import-Module PSDisableDevice
     
-    Write-Output "Disabling Hyper-V Video"
-    Get-Device | Where-Object -Property Name -Like "Microsoft Hyper-V Video" | Disable-Device -Confirm:$false
+    # Write-Output "Disabling Hyper-V Video"
+    # Get-PnPDevice | Where-Object -Property Name -Like "Microsoft Hyper-V Video" | Disable-PnPDevice -Confirm:$false
 
-    Write-Output "Disabling Generic PnP Monitor"
-    Get-Device | Where-Object -Property Name -Like "Generic PnP Monitor" | Where DeviceParent -like "*BasicDisplay*" | Disable-Device  -Confirm:$false
+    # Write-Output "Disabling Generic PnP Monitor"
+    # Get-PnPDevice | Where-Object -Property Name -Like "Generic PnP Monitor" | Where DeviceParent -like "*BasicDisplay*" | Disable-PnPDevice  -Confirm:$false
 
-    Write-Output "Delete the basic display adapter's drivers (since Parsec still see 2 Display adapter)"
-    takeown /f C:\Windows\System32\drivers\BasicDisplay.sys
-    icacls C:\Windows\System32\drivers\BasicDisplay.sys /grant "$env:username`:F"
-    move C:\Windows\System32\drivers\BasicDisplay.sys C:\Windows\System32\Drivers\BasicDisplay.old
+    # # Define the device name you want to disable
+    # $hyperv = "Microsoft Hyper-V Video"
+
+    # # Get the device information for the specified name
+    # $device = Get-PnpDevice | Where-Object { $_.Name -eq $hyperv }
+
+    # # Check if the device was found
+    # if ($device) {
+    #     # Disable the device
+    #     Disable-PnpDevice -InstanceId $device.InstanceId -Confirm:$false
+    #     Write-Host "Device '$hyperv' has been disabled."
+    # } else {
+    #     Write-Host "Device '$hyperv' not found."
+    # }
+
+    # $pnpgenericmonitor = "Generic PnP Monitor"
+
+    # $device = Get-PnpDevice | Where-Object { $_.Name -eq $pnpgenericmonitor }
+
+    # # Check if the device was found
+    # if ($device) {
+    #     # Disable the device
+    #     Disable-PnpDevice -InstanceId $device.InstanceId -Confirm:$false
+    #     Write-Host "Device '$pnpgenericmonitor' has been disabled."
+    # } else {
+    #     Write-Host "Device '$pnpgenericmonitor' not found."
+    # }
+
+    $devcon = "C:\Program Files (x86)\Windows Kits\10\Tools\x64\devcon.exe"
+
+    # Define the device name you want to disable
+    $deviceName = "Microsoft Hyper-V Video"
+
+    # Find the device with the specified name
+    $device = Get-PnpDevice | Where-Object { $_.Name -eq $deviceName }
+
+    if ($device) {
+        # Run devcon to disable the device by its hardware ID
+        & $devcon disable $device.HardwareID[0]
+        Write-Host "Device '$deviceName' has been disabled."
+    } else {
+        Write-Host "Device '$deviceName' not found."
+    }
+
+    $deviceName = "Generic PnP Monitor"
+
+    # Find the device with the specified name
+    $device = Get-PnpDevice | Where-Object { $_.Name -eq $deviceName }
+
+    if ($device) {
+        # Run devcon to disable the device by its hardware ID
+        & $devcon disable $device.HardwareID[0]
+        Write-Host "Device '$deviceName' has been disabled."
+    } else {
+        Write-Host "Device '$deviceName' not found."
+    }
+
+    # Write-Output "Delete the basic display adapter's drivers (since Parsec still see 2 Display adapter)"
+    # takeown /f C:\Windows\System32\drivers\BasicDisplay.sys
+    # icacls C:\Windows\System32\drivers\BasicDisplay.sys /grant "$env:username`:F"
+    # move C:\Windows\System32\drivers\BasicDisplay.sys C:\Windows\System32\Drivers\BasicDisplay.old
 
     Write-Output "Enabling NvFBC..."
     (New-Object System.Net.WebClient).DownloadFile("https://github.com/nVentiveUX/azure-gaming/raw/master/NvFBCEnable.zip", "$PSScriptRoot\NvFBCEnable.zip")
