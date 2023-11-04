@@ -92,23 +92,31 @@ function Install-VirtualAudio {
     Start-Process -FilePath "C:\$wdk_installer" -ArgumentList "/S" -Wait
 
     $cert = "vb_cert.cer"
-    $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$cert"
+    # $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$cert"
 
-    Write-Output "Downloading vb certificate from $url"
-    $webClient.DownloadFile($url, "C:\$cert")
+    # Write-Output "Downloading vb certificate from $url"
+    # $webClient.DownloadFile($url, "C:\$cert")
 
     Write-Output "Importing vb certificate"
-    #Import-Certificate -FilePath "C:\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
-
-    $CertificateFullPath = "C:\$cert"
-    $CertStorePath = "сert:\LocalMachine\TrustedPublisher"
-    if( Get-WMIObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 4 -and ( $_.DeviceID -eq ($CertificateFullPath).Substring(0,2) ) }){
-        $CertStore = Get-Item $CertStorePath
-        $CertStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
-        $CertStore.Add($CertificateFullPath)
-        $CertStore.Close()
-    }else{
-        Import-Certificate -FilePath $CertificateFullPath -CertStoreLocation $CertStorePath
+    try {
+        Import-Certificate -FilePath "C:\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
+    }
+    catch {
+        try {
+            $CertificateFullPath = "C:\$cert"
+            $CertStorePath = "cert:\LocalMachine\TrustedPublisher"
+            if( Get-WMIObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 4 -and ( $_.DeviceID -eq ($CertificateFullPath).Substring(0,2) ) }){
+                $CertStore = Get-Item $CertStorePath
+                $CertStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+                $CertStore.Add($CertificateFullPath)
+                $CertStore.Close()
+            }else{
+                Import-Certificate -FilePath $CertificateFullPath -CertStoreLocation $CertStorePath
+            }
+        }
+        catch {
+            certutil -Enterprise -Addstore "TrustedPublisher" "C:\$cert"
+        }
     }
 
 

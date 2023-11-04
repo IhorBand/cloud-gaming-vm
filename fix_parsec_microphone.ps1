@@ -1,6 +1,16 @@
-# Load the System.Web assembly for JavaScriptSerializer
-Add-Type -AssemblyName System.Web
+# Get the process by name (parsecd.exe)
+$process = Get-Process -Name "parsecd"
 
+# Check if the process was found
+if ($process) {
+    # If found, stop the process
+    Stop-Process -Name "parsecd" -Force
+    Write-Host "parsecd.exe has been terminated."
+} else {
+    Write-Host "parsecd.exe is not running."
+}
+
+# Load the System.Web assembly for JavaScriptSerializer
 $tempJsonData = @"
 [
 	"See https://parsec.app/config for documentation and example. JSON must be valid before saving or file be will be erased.",
@@ -16,6 +26,9 @@ $tempJsonData = @"
 "@
 
 try {
+    Add-Type -AssemblyName System.Web
+    Add-Type -AssemblyName System.Web.Extensions
+    
     $parsecConfigPath = "C:\ProgramData\Parsec\config.json"
 
     # Check if the file exists
