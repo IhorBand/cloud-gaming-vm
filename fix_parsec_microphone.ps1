@@ -1,9 +1,33 @@
+# Load the System.Web assembly for JavaScriptSerializer
+Add-Type -AssemblyName System.Web
+
+$tempJsonData = @"
+[
+	"See https://parsec.app/config for documentation and example. JSON must be valid before saving or file be will be erased.",
+	{
+		"encoder_bitrate": {
+			"value": 50
+		},
+		"host_virtual_microphone": {
+			"value": 1
+		}
+	}
+]
+"@
+
 try {
-    # Load the System.Web assembly for JavaScriptSerializer
-    Add-Type -AssemblyName System.Web
+    $parsecConfigPath = "C:\ProgramData\Parsec\config.json"
+
+    # Check if the file exists
+    if (-not (Test-Path -Path $parsecConfigPath)) {
+        # Create the file and its parent folders
+        $null = New-Item -Path $parsecConfigPath -ItemType File
+        Set-Content -Path $parsecConfigPath -Value $tempJsonData
+    }
+
 
     # Read the JSON configuration file
-    $jsonData = Get-Content -Path 'E:\config.json' -Raw
+    $jsonData = Get-Content -Path $parsecConfigPath -Raw
 
     # Create a JavaScriptSerializer object
     $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
@@ -29,7 +53,7 @@ try {
     $jsonData = $serializer.Serialize($configuration)
 
     # Write the modified JSON back to the file
-    Set-Content -Path 'E:\config.json' -Value $jsonData
+    Set-Content -Path $parsecConfigPath -Value $jsonData
     Write-Output "Parsec Microphone turned on."
 }
 catch {

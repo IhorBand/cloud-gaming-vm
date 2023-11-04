@@ -98,7 +98,20 @@ function Install-VirtualAudio {
     $webClient.DownloadFile($url, "C:\$cert")
 
     Write-Output "Importing vb certificate"
-    Import-Certificate -FilePath "C:\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
+    #Import-Certificate -FilePath "C:\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
+
+    $CertificateFullPath = "C:\$cert"
+    $CertStorePath = "сert:\LocalMachine\TrustedPublisher"
+    if( Get-WMIObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 4 -and ( $_.DeviceID -eq ($CertificateFullPath).Substring(0,2) ) }){
+        $CertStore = Get-Item $CertStorePath
+        $CertStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+        $CertStore.Add($CertificateFullPath)
+        $CertStore.Close()
+    }else{
+        Import-Certificate -FilePath $CertificateFullPath -CertStoreLocation $CertStorePath
+    }
+
+
 
     Write-Output "Installing virtual audio driver"
     Start-Process -FilePath $devcon -ArgumentList "install", "C:\$driver_folder\$driver_inf", $hardward_id -Wait
