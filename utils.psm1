@@ -17,14 +17,14 @@ function Update-Windows {
     $update_script = "PS_WinUpdate.ps1"
 
     Write-Output "Downloading Windows Update Powershell Script from $url"
-    $webClient.DownloadFile($url, "$PSScriptRoot\$compressed_file")
-    Unblock-File -Path "$PSScriptRoot\$compressed_file"
+    $webClient.DownloadFile($url, "C:\$compressed_file")
+    Unblock-File -Path "C:\$compressed_file"
 
     Write-Output "Extracting Windows Update Powershell Script"
-    Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\" -Force
+    Expand-Archive "C:\$compressed_file" -DestinationPath "C:\" -Force
 
     Write-Output "Running Windows Update"
-    Invoke-Expression $PSScriptRoot\$update_script
+    Invoke-Expression C:\$update_script
 }
 
 function Update-Firewall {
@@ -35,6 +35,7 @@ function Update-Firewall {
 function Disable-Defender {
     Write-Output "Disable Windows Defender real-time protection."
     Set-MpPreference -DisableRealtimeMonitoring $true
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 1 -Type DWord
 }
 
 function Disable-ScheduledTasks {
@@ -56,20 +57,6 @@ function Edit-VisualEffectsRegistry {
     Set-ItemProperty -Path "Registry::\HKEY_USERS\.DEFAULT\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2
 }
 
-function Install-NvidiaDriver ($manual_install) {
-    Write-Output "Installing Nvidia Driver"
-    $driver_file = "nvidia-driver.exe"
-    $version = "391.03"
-    $url = "http://us.download.nvidia.com/Windows/Quadro_Certified/$version/$version-quadro-grid-desktop-notebook-win10-64bit-international-whql.exe"
-
-    Write-Output "Downloading Nvidia M60 driver from URL $url"
-    $webClient.DownloadFile($url, "$PSScriptRoot\$driver_file")
-
-    Write-Output "Installing Nvidia M60 driver from file $PSScriptRoot\$driver_file"
-    Start-Process -FilePath "$PSScriptRoot\$driver_file" -ArgumentList "-s", "-noreboot" -Wait
-    Start-Process -FilePath "C:\NVIDIA\$version\setup.exe" -ArgumentList "-s", "-noreboot" -Wait
-}
-
 function Disable-TCC {
     $nvsmi = "C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
     $gpu = & $nvsmi --format=csv,noheader --query-gpu=pci.bus_id
@@ -89,32 +76,32 @@ function Install-VirtualAudio {
     $hardward_id = "VBAudioVACWDM"
 
     Write-Output "Downloading Virtual Audio Driver"
-    $webClient.DownloadFile("https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack43.zip", "$PSScriptRoot\$compressed_file")
-    Unblock-File -Path "$PSScriptRoot\$compressed_file"
+    $webClient.DownloadFile("https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack43.zip", "C:\$compressed_file")
+    Unblock-File -Path "C:\$compressed_file"
 
     Write-Output "Extracting Virtual Audio Driver"
-    Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\$driver_folder" -Force
+    Expand-Archive "C:\$compressed_file" -DestinationPath "C:\$driver_folder" -Force
 
     $wdk_installer = "wdksetup.exe"
     $devcon = "C:\Program Files (x86)\Windows Kits\10\Tools\x64\devcon.exe"
 
     Write-Output "Downloading Windows Development Kit installer"
-    $webClient.DownloadFile("http://go.microsoft.com/fwlink/p/?LinkId=526733", "$PSScriptRoot\$wdk_installer")
+    $webClient.DownloadFile("http://go.microsoft.com/fwlink/p/?LinkId=526733", "C:\$wdk_installer")
 
     Write-Output "Downloading and installing Windows Development Kit"
-    Start-Process -FilePath "$PSScriptRoot\$wdk_installer" -ArgumentList "/S" -Wait
+    Start-Process -FilePath "C:\$wdk_installer" -ArgumentList "/S" -Wait
 
     $cert = "vb_cert.cer"
     $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$cert"
 
     Write-Output "Downloading vb certificate from $url"
-    $webClient.DownloadFile($url, "$PSScriptRoot\$cert")
+    $webClient.DownloadFile($url, "C:\$cert")
 
     Write-Output "Importing vb certificate"
-    Import-Certificate -FilePath "$PSScriptRoot\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
+    Import-Certificate -FilePath "C:\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
 
     Write-Output "Installing virtual audio driver"
-    Start-Process -FilePath $devcon -ArgumentList "install", "$PSScriptRoot\$driver_folder\$driver_inf", $hardward_id -Wait
+    Start-Process -FilePath $devcon -ArgumentList "install", "C:\$driver_folder\$driver_inf", $hardward_id -Wait
 }
 
 function Install-Chocolatey {
@@ -133,31 +120,6 @@ function Disable-IPv6To4 {
 function Install-NSSM {
     Write-Output "Installing NSSM for launching services that run apps at startup"
     choco install nssm --force
-}
-
-function Set-ScheduleWorkflow ($admin_username, $admin_password, $manual_install) {
-    $script_name = "setup2.ps1"
-    $url = "https://raw.githubusercontent.com/ecalder6/azure-gaming/master/$script_name"
-
-    Write-Output "Downloading second stage setup script from $url"
-    $webClient.DownloadFile($url, "C:\$script_name")
-
-    $powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $service_name = "SetupSecondStage"
-    Write-Output "Creating a service $service_name to finish setting up"
-    $cmd = "-ExecutionPolicy Unrestricted -NoProfile -File C:\$script_name -admin_username `"$admin_username`" -admin_password `"$admin_password`""
-    if ($manual_install) {
-        $cmd = -join ($cmd, " -manual_install")
-    }
-
-    nssm install $service_name $powershell $cmd
-    nssm set $service_name Start SERVICE_AUTO_START
-    nssm set $service_name AppExit 0 Exit
-}
-
-function Disable-ScheduleWorkflow {
-    $service_name = "SetupSecondStage"
-    nssm remove $service_name confirm
 }
 
 function Add-DisconnectShortcut {
@@ -187,6 +149,12 @@ function Add-AutoLogin ($admin_username, $admin_password) {
     Set-ItemProperty $registry "DefaultPassword" -Value $admin_password -type String
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Force
     Set-ItemProperty "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreen" -Value 1 -type DWord
+
+    #skip privacy settings screen
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" -Name "PrivacyConsentStatus" -Value 1 -PropertyType DWORD -Force 
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" -Name "SkipMachineOOBE" -Value 1 -PropertyType DWORD -Force 
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" -Name "ProtectYourPC" -Value 3 -PropertyType DWORD -Force 
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" -Name "SkipUserOOBE" -Value 1 -PropertyType DWORD -Force 
 }
 
 # legacy approach as Parsec still see 2 Displays
@@ -196,13 +164,13 @@ function Disable-Devices {
     # $extract_folder = "DeviceManagement"
 
     # Write-Output "Downloading Device Management Powershell Script from $url"
-    # $webClient.DownloadFile($url, "$PSScriptRoot\$compressed_file")
-    # Unblock-File -Path "$PSScriptRoot\$compressed_file"
+    # $webClient.DownloadFile($url, "C:\$compressed_file")
+    # Unblock-File -Path "C:\$compressed_file"
 
     # Write-Output "Extracting Device Management Powershell Script"
-    # Expand-Archive "$PSScriptRoot\$compressed_file" -DestinationPath "$PSScriptRoot\$extract_folder" -Force
+    # Expand-Archive "C:\$compressed_file" -DestinationPath "C:\$extract_folder" -Force
 
-    # Import-Module "$PSScriptRoot\$extract_folder\DeviceManagement.psd1"
+    # Import-Module "C:\$extract_folder\DeviceManagement.psd1"
 
     # Install-PackageProvider -Name NuGet -Force -Confirm:$False
     # Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2
@@ -284,34 +252,22 @@ function Disable-Devices {
     # move C:\Windows\System32\drivers\BasicDisplay.sys C:\Windows\System32\Drivers\BasicDisplay.old
 
     Write-Output "Enabling NvFBC..."
-    (New-Object System.Net.WebClient).DownloadFile("https://github.com/nVentiveUX/azure-gaming/raw/master/NvFBCEnable.zip", "$PSScriptRoot\NvFBCEnable.zip")
-    Expand-Archive -LiteralPath "$PSScriptRoot\NvFBCEnable.zip" -DestinationPath "$PSScriptRoot"
-    & "$PSScriptRoot\NvFBCEnable.exe" -enable -noreset
+    (New-Object System.Net.WebClient).DownloadFile("https://github.com/nVentiveUX/azure-gaming/raw/master/NvFBCEnable.zip", "C:\NvFBCEnable.zip")
+    Expand-Archive -LiteralPath "C:\NvFBCEnable.zip" -DestinationPath "C:\"
+    & "C:\NvFBCEnable.exe" -enable -noreset
 
     Write-Host -ForegroundColor Green "Done."
 }
-
-#legacy approach
-# function Install-Steam {
-#     $steam_exe = "steam.exe"
-#     Write-Output "Downloading steam into path $PSScriptRoot\$steam_exe"
-#     $webClient.DownloadFile("https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe", "$PSScriptRoot\$steam_exe")
-#     Write-Output "Installing steam"
-#     Start-Process -FilePath "$PSScriptRoot\$steam_exe" -ArgumentList "/S" -Wait
-
-#     Write-Output "Cleaning up steam installation file"
-#     Remove-Item -Path $PSScriptRoot\$steam_exe -Confirm:$false
-# }
 
 function Install-Steam {
   Write-Host -ForegroundColor Cyan "Starting Install-Steam function..."
 
   $steam_exe = "steam.exe"
-  Write-Output "Downloading steam into path $PSScriptRoot\$steam_exe"
-  (New-Object System.Net.WebClient).DownloadFile("http://media.steampowered.com/client/installer/SteamSetup.exe", "$PSScriptRoot\$steam_exe")
+  Write-Output "Downloading steam into path C:\$steam_exe"
+  (New-Object System.Net.WebClient).DownloadFile("http://media.steampowered.com/client/installer/SteamSetup.exe", "C:\$steam_exe")
   Write-Output "Installing steam"
-  Start-Process -FilePath "$PSScriptRoot\$steam_exe" -ArgumentList "/S" -Wait
-  Remove-Item -Path "$PSScriptRoot\$steam_exe" -Confirm:$false
+  Start-Process -FilePath "C:\$steam_exe" -ArgumentList "/S" -Wait
+  Remove-Item -Path "C:\$steam_exe" -Confirm:$false
 
   Write-Host -ForegroundColor Green "Done."
 }
@@ -320,11 +276,11 @@ function Install-Parsec {
   Write-Host -ForegroundColor Cyan "Starting Install-Parsec function..."
 
   $parsec_exe = "parsec-windows.exe"
-  Write-Output "Downloading Parsec into path $PSScriptRoot\$parsec_exe"
-  (New-Object System.Net.WebClient).DownloadFile("https://s3.amazonaws.com/parsec-build/package/parsec-windows.exe", "$PSScriptRoot\$parsec_exe")
+  Write-Output "Downloading Parsec into path C:\$parsec_exe"
+  (New-Object System.Net.WebClient).DownloadFile("https://s3.amazonaws.com/parsec-build/package/parsec-windows.exe", "C:\$parsec_exe")
   Write-Output "Installing Parsec"
-  Start-Process -FilePath "$PSScriptRoot\$parsec_exe" -ArgumentList "/S /shared" -Wait
-  Remove-Item -Path "$PSScriptRoot\$parsec_exe" -Confirm:$false
+  Start-Process -FilePath "C:\$parsec_exe" -ArgumentList "/S /shared" -Wait
+  Remove-Item -Path "C:\$parsec_exe" -Confirm:$false
 
   Write-Host -ForegroundColor Green "Done."
 }
@@ -333,11 +289,11 @@ function Install-EpicGameLauncher {
   Write-Host -ForegroundColor Cyan "Starting Install-EpicGameLauncher function..."
 
   $epic_msi = "EpicGamesLauncherInstaller.msi"
-  Write-Output "Downloading Epic Games Launcher into path $PSScriptRoot\$epic_msi"
-  (New-Object System.Net.WebClient).DownloadFile("https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi", "$PSScriptRoot\$epic_msi")
+  Write-Output "Downloading Epic Games Launcher into path C:\$epic_msi"
+  (New-Object System.Net.WebClient).DownloadFile("https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi", "C:\$epic_msi")
   Write-Output "Installing Epic Games Launcher"
-  Start-Process -FilePath "$PSScriptRoot\$epic_msi" -ArgumentList "/quiet" -Wait
-  Remove-Item -Path "$PSScriptRoot\$epic_msi" -Confirm:$false
+  Start-Process -FilePath "C:\$epic_msi" -ArgumentList "/quiet" -Wait
+  Remove-Item -Path "C:\$epic_msi" -Confirm:$false
 
   Write-Host -ForegroundColor Green "Done."
 }

@@ -1,25 +1,6 @@
-# - start batniki
-
-# перевірити зв'зяність
-
-# попробувати
-
-$admin_username = ""
-$admin_password = ""
 $windows_update = $false
 $manual_install = $true
 $virtual_audio = $true
-
-$filePath = "C:\vm-script-parameters.txt"
-# Read the content of the file
-$fileContent = Get-Content -Path $filePath
-
-# Split the content using the '|' character
-$variables = $fileContent.Split('|')
-
-# Extract the two variables
-$admin_username = $variables[0]
-$admin_password = $variables[1]
 
 #setup computer
 
@@ -51,7 +32,6 @@ Disable-Devices
 Install-Parsec
 Install-Steam
 Install-EpicGameLauncher
-Add-AutoLogin $admin_username $admin_password
 
 # Define the destination folder path (Startup folder)
 $startupPath = [System.IO.Path]::Combine([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::CommonStartMenu), "Programs\Startup")
@@ -63,6 +43,7 @@ Download-To $parsecvbdurl $destinationFilePath
 
 #download resolution fix startup script
 Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/nvcli.exe" "C:\nvcli.exe"
+Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/fix_parsec_microphone.ps1" "C:\fix_parsec_microphone.ps1"
 
 $destinationFilePath = [System.IO.Path]::Combine($startupPath, 'nvcli_resolutionfix.bat')
 Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/nvcli_resolutionfix.bat" $destinationFilePath
