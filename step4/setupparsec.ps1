@@ -1,3 +1,6 @@
+$script_name = "utils.psm1"
+Import-Module "C:\$script_name"
+
 # Get the process by name (parsecd.exe)
 $process = Get-Process -Name "parsecd"
 
@@ -72,3 +75,18 @@ try {
 catch {
     Write-Host "An error occurred: $_"
 }
+
+
+# Define the destination folder path (Startup folder)
+$startupPath = [System.IO.Path]::Combine([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::CommonStartMenu), "Programs\Startup")
+
+
+$destinationFilePath = [System.IO.Path]::Combine($startupPath, 'finish.bat')
+Download-To "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/finish.bat" $destinationFilePath
+
+#remove old script
+# Build the full destination path including the filename
+$installgpudriverFilePath = [System.IO.Path]::Combine($startupPath, 'start_setupparsec.bat')
+Remove-Item -Path $installgpudriverFilePath -Force
+
+Restart-Computer

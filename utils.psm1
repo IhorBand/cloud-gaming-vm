@@ -92,10 +92,10 @@ function Install-VirtualAudio {
     Start-Process -FilePath "C:\$wdk_installer" -ArgumentList "/S" -Wait
 
     $cert = "vb_cert.cer"
-    # $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$cert"
+    $url = "https://raw.githubusercontent.com/IhorBand/cloud-gaming-vm/main/$cert"
 
     # Write-Output "Downloading vb certificate from $url"
-    # $webClient.DownloadFile($url, "C:\$cert")
+    $webClient.DownloadFile($url, "C:\$cert")
 
     Write-Output "Importing vb certificate"
     try {
