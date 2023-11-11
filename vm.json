@@ -22,6 +22,10 @@
             "defaultValue": "admin",
             "type": "string"
         },
+        "azureLocation": {
+            "defaultValue": "northeurope",
+            "type": "string"
+        },
         "scriptLocation": {
             "type": "string",
             "metadata": {
@@ -52,7 +56,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2023-05-01",
             "name": "[variables('networkSecurityGroupName')]",
-            "location": "northeurope",
+            "location": "[parameters('azureLocation')]",
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
@@ -92,7 +96,7 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2023-05-01",
             "name": "[variables('publicIPAdressesName')]",
-            "location": "northeurope",
+            "location": "[parameters('azureLocation')]",
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
@@ -107,7 +111,7 @@
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2023-05-01",
             "name": "[variables('virtualNetworkName')]",
-            "location": "northeurope",
+            "location": "[parameters('azureLocation')]",
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
@@ -134,7 +138,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2023-03-01",
             "name": "[variables('fullVMName')]",
-            "location": "northeurope",
+            "location": "[parameters('azureLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             ],
@@ -223,7 +227,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2023-05-01",
             "name": "[variables('networkInterfaceName')]",
-            "location": "northeurope",
+            "location": "[parameters('azureLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAdressesName'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
