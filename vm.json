@@ -49,6 +49,7 @@
         "networkSecurityGroupName": "[concat(variables('fullVMName'), '-nsg')]",
         "osDiskName": "[concat(variables('fullVMName'), '-disk_OsDisk_1')]",
         "scriptFileName": "setup.ps1",
+        "zone": "2",
         "scriptParameters": "[concat('-admin_username \"', parameters('osAdminUserName'), '\" -admin_password \"', parameters('osAdminPassword'), '\"')]"
     },
     "resources": [
@@ -141,6 +142,9 @@
             "location": "[parameters('azureLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "zones": [
+                "[variables('zone')]"
             ],
             "tags": {
                 "owner": "[parameters('owner')]",
