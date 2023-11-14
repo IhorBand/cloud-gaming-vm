@@ -109,9 +109,6 @@
             "apiVersion": "2023-05-01",
             "name": "[variables('publicIPAdressesName')]",
             "location": "[parameters('azureLocation')]",
-            "zones": [
-                "[parameters('zone')]"
-            ],
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
