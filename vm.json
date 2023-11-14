@@ -39,6 +39,18 @@
             "metadata": {
                 "description": "String passed down to the Virtual Machine."
             }
+        },
+        "zone": {
+            "type": "string",
+            "defaultValue": "1",
+            "allowedValues": [
+                "1",
+                "2",
+                "3"
+            ],
+            "metadata": {
+                "description": "Zone number for the virtual machine"
+            }
         }
     },
     "variables": {
@@ -49,7 +61,6 @@
         "networkSecurityGroupName": "[concat(variables('fullVMName'), '-nsg')]",
         "osDiskName": "[concat(variables('fullVMName'), '-disk_OsDisk_1')]",
         "scriptFileName": "setup.ps1",
-        "zone": "2",
         "scriptParameters": "[concat('-admin_username \"', parameters('osAdminUserName'), '\" -admin_password \"', parameters('osAdminPassword'), '\"')]"
     },
     "resources": [
@@ -98,6 +109,9 @@
             "apiVersion": "2023-05-01",
             "name": "[variables('publicIPAdressesName')]",
             "location": "[parameters('azureLocation')]",
+            "zones": [
+                "[parameters('zone')]"
+            ],
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
@@ -144,7 +158,7 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             ],
             "zones": [
-                "[variables('zone')]"
+                "[parameters('zone')]"
             ],
             "tags": {
                 "owner": "[parameters('owner')]",
