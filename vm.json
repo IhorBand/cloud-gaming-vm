@@ -39,19 +39,19 @@
             "metadata": {
                 "description": "String passed down to the Virtual Machine."
             }
-        }//,
-        // "zone": {
-        //     "type": "string",
-        //     "defaultValue": "1",
-        //     "allowedValues": [
-        //         "1",
-        //         "2",
-        //         "3"
-        //     ],
-        //     "metadata": {
-        //         "description": "Zone number for the virtual machine"
-        //     }
-        // }
+        },
+        "zone": {
+            "type": "string",
+            "defaultValue": "2",
+            "allowedValues": [
+                "1",
+                "2",
+                "3"
+            ],
+            "metadata": {
+                "description": "Zone number for the virtual machine"
+            }
+        }
     },
     "variables": {
         "fullVMName": "[concat(parameters('vm_name'), '-nvidia-tesla-gaming-vm')]",
@@ -109,6 +109,9 @@
             "apiVersion": "2023-05-01",
             "name": "[variables('publicIPAdressesName')]",
             "location": "[parameters('azureLocation')]",
+            "zones": [
+                "[parameters('zone')]"
+            ],
             "tags": {
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
@@ -153,6 +156,9 @@
             "location": "[parameters('azureLocation')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "zones": [
+                "[parameters('zone')]"
             ],
             "tags": {
                 "owner": "[parameters('owner')]",
