@@ -42,7 +42,7 @@
         },
         "zone": {
             "type": "string",
-            "defaultValue": "2",
+            "defaultValue": "1",
             "allowedValues": [
                 "1",
                 "2",
@@ -113,6 +113,9 @@
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
             },
+            "zones": [
+                "[parameters('zone')]"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4
