@@ -113,13 +113,13 @@
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
             },
-            "sku": {
-                "name": "Standard",
-                "tier": "Regional"
-            },
-            "zones": [
-                "[parameters('zone')]"
-            ],
+            // "sku": {
+            //     "name": "Standard",
+            //     "tier": "Regional"
+            // },
+            // "zones": [
+            //     "[parameters('zone')]"
+            // ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4
