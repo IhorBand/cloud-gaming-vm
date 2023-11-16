@@ -113,6 +113,10 @@
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
             },
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
             "zones": [
                 "[parameters('zone')]"
             ],
