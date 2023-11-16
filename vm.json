@@ -51,6 +51,13 @@
             "metadata": {
                 "description": "Zone number for the virtual machine"
             }
+        },
+        "dnsLabelPrefix": {
+            "type": "string",
+            "defaultValue": "[toLower(concat('linuxvm-', uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
         }
     },
     "variables": {
@@ -113,15 +120,19 @@
                 "owner": "[parameters('owner')]",
                 "type": "cloud-gaming"
             },
-            // "sku": {
-            //     "name": "Standard",
-            //     "tier": "Regional"
-            // },
-            // "zones": [
-            //     "[parameters('zone')]"
-            // ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "[parameters('zone')]"
+            ],
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                },
                 "idleTimeoutInMinutes": 4
             },
             "dependsOn": []
